@@ -1,0 +1,90 @@
+<header
+    class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <!-- Logo -->
+        <div class="flex items-center">
+            <a href="<%= (typeof user !== 'undefined' && user) ? '/dashboard' : '/' %>"
+                class="text-2xl font-bold text-pronto-primary tracking-tight hover:opacity-80 transition-opacity">
+                Pronto<span class="text-gray-900 dark:text-white">.</span>
+            </a>
+        </div>
+
+        <!-- Right Side Nav -->
+        <nav class="flex items-center space-x-4">
+
+            <% if (typeof user !=='undefined' && user) { %>
+                <!-- Authenticated Nav Items -->
+                <a href="/dashboard"
+                    class="hidden md:inline-flex text-pronto-primary bg-blue-50 dark:bg-blue-900/40 dark:text-blue-200 font-medium px-4 py-2 rounded-lg transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/60">
+                    Dashboard
+                </a>
+                <a href="/dna"
+                    class="hidden md:inline-flex text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    Business DNA
+                </a>
+                <a href="/campaign"
+                    class="text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 font-medium px-4 py-2 rounded-lg transition-all shadow-md transform hover:scale-105">
+                    <i class="ri-add-line mr-1"></i> New Campaign
+                </a>
+
+                <!-- User Dropdown / Profile -->
+                <div
+                    class="relative ml-2 flex items-center space-x-3 pl-3 border-l border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center space-x-3 group cursor-pointer">
+                        <% if (user.avatar_url) { %>
+                            <img src="<%= user.avatar_url %>" alt="<%= user.name %>"
+                                class="h-9 w-9 rounded-full ring-2 ring-white dark:ring-gray-700 shadow-sm object-cover">
+                            <% } else { %>
+                                <div
+                                    class="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm ring-2 ring-white dark:ring-gray-700 shadow-sm">
+                                    <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                                </div>
+                                <% } %>
+
+                                    <div class="flex flex-col text-right hidden sm:block">
+                                        <span class="text-sm font-semibold text-gray-900 dark:text-white leading-none">
+                                            <%= user.name %>
+                                        </span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
+                                            <%= user.company_name || 'My Company' %>
+                                        </span>
+                                    </div>
+                    </div>
+
+                    <a href="/auth/logout"
+                        class="p-2 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+                        title="Logout">
+                        <i class="ri-logout-box-r-line text-xl"></i>
+                    </a>
+                </div>
+
+                <% } else { %>
+                    <!-- Guest Nav Items -->
+                    <a href="/auth/login"
+                        class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        Login
+                    </a>
+                    <a href="/auth/register"
+                        class="text-white bg-gray-900 dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-medium px-5 py-2.5 rounded-lg transition-all shadow-lg transform hover:scale-105">
+                        Get Started
+                    </a>
+                    <% } %>
+
+                        <!-- Theme Toggle -->
+                        <div
+                            class="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-full border border-gray-200 dark:border-gray-700 ml-2 shadow-inner">
+                            <button onclick="setTheme('light')"
+                                class="p-1.5 rounded-full hover:bg-white dark:hover:bg-gray-700 text-gray-500 hover:text-yellow-500 hover:shadow-sm transition-all"
+                                title="Light Mode">
+                                <i class="ri-sun-fill"></i>
+                            </button>
+                            <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
+                            <button onclick="setTheme('dark')"
+                                class="p-1.5 rounded-full hover:bg-white dark:hover:bg-gray-600 text-gray-500 hover:text-indigo-400 hover:shadow-sm transition-all"
+                                title="Dark Mode">
+                                <i class="ri-moon-fill"></i>
+                            </button>
+                        </div>
+        </nav>
+    </div>
+</header>

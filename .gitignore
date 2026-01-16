@@ -1,0 +1,9 @@
+/.env
+/check-key.js
+/node_modules
+/pronto.srs.json
+/README.md
+client_secret_*.json
+
+/public/uploads/*
+!/public/uploads/.gitkeep

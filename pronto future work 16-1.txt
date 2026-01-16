@@ -1,0 +1,5 @@
+pronto future work - 
+- registration page (2fa)
+- register with google 
+- log in with  google
+- add more info for manual registration

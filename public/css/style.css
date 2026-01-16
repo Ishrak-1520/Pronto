@@ -1,0 +1,9 @@
+/* Basic Styles */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Custom Utilities if needed */
+.rounded-pronto {
+    border-radius: 0.75rem;
+}

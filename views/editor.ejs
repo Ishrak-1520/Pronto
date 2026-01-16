@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <script src="/js/theme.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pronto: {
+                            primary: '#2563EB',
+                            secondary: '#7C3AED',
+                            accent: '#10B981',
+                            surface: '#FFFFFF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white h-screen flex flex-col overflow-hidden transition-colors duration-300">
+    <%- include('partials/background') %>
+        <!-- Header -->
+        <header
+            class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-800 z-50 flex-shrink-0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="/dashboard" class="text-gray-500 hover:text-gray-900 flex items-center">
+                        <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back
+                    </a>
+                    <span class="h-6 w-px bg-gray-200"></span>
+                    <h1 class="text-xl font-bold text-gray-900 truncate max-w-xs">
+                        <%= campaign.title %>
+                    </h1>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <%= campaign.status %>
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <div
+                        class="flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 rounded-full p-1 border border-gray-200 dark:border-gray-700">
+                        <button onclick="setTheme('light')"
+                            class="p-1.5 rounded-full hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all"
+                            title="Light">
+                            <i class="ri-sun-line text-yellow-500 text-sm"></i>
+                        </button>
+                        <button onclick="setTheme('dark')"
+                            class="p-1.5 rounded-full hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all"
+                            title="Dark">
+                            <i class="ri-moon-line text-indigo-400 text-sm"></i>
+                        </button>
+                        <button onclick="setTheme('system')"
+                            class="p-1.5 rounded-full hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all"
+                            title="System">
+                            <i class="ri-computer-line text-gray-500 dark:text-gray-400 text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
+
+                    <button disabled
+                        class="text-gray-400 cursor-not-allowed font-medium text-sm hidden sm:block">Autosaved</button>
+
+                    <% if (campaign.status==='Published' ) { %>
+                        <button id="publishBtn" disabled
+                            class="bg-green-600 text-white px-4 py-2 rounded-md font-medium cursor-not-allowed shadow-sm flex items-center">
+                            <i class="ri-check-line mr-1"></i> Live
+                        </button>
+                        <% } else { %>
+                            <button id="publishBtn"
+                                class="bg-pronto-primary text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors shadow-sm flex items-center">
+                                Publish
+                            </button>
+                            <% } %>
+
+                                <!-- User Profile -->
+                                <% if (user) { %>
+                                    <div class="relative group ml-2">
+                                        <button class="flex items-center space-x-2 focus:outline-none">
+                                            <div
+                                                class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 p-0.5">
+                                                <div
+                                                    class="w-full h-full rounded-full bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+                                                    <% if (user.picture) { %>
+                                                        <img src="<%= user.picture %>" alt="Profile"
+                                                            class="w-full h-full object-cover">
+                                                        <% } else { %>
+                                                            <span
+                                                                class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                                                                <%= user.given_name ? user.given_name[0] : 'U' %>
+                                                            </span>
+                                                            <% } %>
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <!-- Dropdown -->
+                                        <div
+                                            class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
+                                            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                    <%= user.given_name %>
+                                                        <%= user.family_name %>
+                                                </p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                    <%= user.company_name || 'Pronto User' %>
+                                                </p>
+                                            </div>
+                                            <a href="/auth/logout"
+                                                class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                                Sign out
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Editor Area -->
+        <div class="flex-grow flex overflow-hidden">
+
+            <!-- Left Column: Copy Editor -->
+            <!-- Left Column: Copy Editor & Brand Chat -->
+            <div
+                class="w-1/2 border-r border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-950/50 backdrop-blur-lg flex flex-col">
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-200 px-6 pt-4 space-x-6 bg-gray-50/50">
+                    <button onclick="switchTab('edit')" id="tabEditBtn"
+                        class="pb-3 text-sm font-medium border-b-2 border-pronto-primary text-pronto-primary transition-colors flex items-center">
+                        <i class="ri-file-edit-line mr-1.5"></i> Edit Details
+                    </button>
+                    <button onclick="switchTab('chat')" id="tabChatBtn"
+                        class="pb-3 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors flex items-center">
+                        <i class="ri-chat-smile-2-line mr-1.5"></i> Brand Chat
+                    </button>
+                </div>
+
+                <!-- Tab Content: Edit Details -->
+                <div id="tabEdit" class="overflow-y-auto p-8 flex-grow">
+                    <div class="max-w-2xl mx-auto space-y-8">
+                        <div>
+                            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Copy Assets</h2>
+
+                            <!-- Headline -->
+                            <!-- AI Generation Action -->
+                            <div
+                                class="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Need ideas?</h3>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Generate headline,
+                                        caption, and strategy in one click.</p>
+                                </div>
+                                <form action="/campaign/<%= campaign.id %>/generate-text" method="POST"
+                                    onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerHTML='<i class=\'ri-loader-4-line animate-spin mr-2\'></i> Generating...'">
+                                    <button type="submit"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-105">
+                                        <i class="ri-magic-line mr-2"></i> Generate with AI
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Visual Context Section (Project Eye) -->
+                            <div
+                                class="mb-6 p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden group transition-all hover:shadow-md">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white flex items-center">
+                                            <i class="ri-eye-line mr-2 text-pronto-primary"></i> Visual Context
+                                        </h3>
+                                        <p
+                                            class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs leading-relaxed">
+                                            Upload a product photo. AI will "see" it and write copy matching the colors
+                                            & style.
+                                        </p>
+                                    </div>
+
+                                    <% if (campaign.reference_image) { %>
+                                        <div class="h-14 w-14 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onclick="window.open('<%= campaign.reference_image %>', '_blank')">
+                                            <img src="<%= campaign.reference_image %>"
+                                                class="w-full h-full object-cover">
+                                        </div>
+                                        <% } %>
+                                </div>
+
+                                <form action="/campaign/<%= campaign.id %>/analyze-image" method="POST"
+                                    enctype="multipart/form-data" class="mt-4"
+                                    onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerHTML='<i class=\'ri-loader-4-line animate-spin mr-2\'></i> Analyzing...'">
+
+                                    <label class="block w-full cursor-pointer mb-3">
+                                        <span class="sr-only">Choose product photo</span>
+                                        <input type="file" name="image" accept="image/*" class="block w-full text-sm text-gray-500
+                                          file:mr-4 file:py-2 file:px-4
+                                          file:rounded-full file:border-0
+                                          file:text-xs file:font-semibold
+                                          file:bg-pronto-primary/10 file:text-pronto-primary
+                                          hover:file:bg-pronto-primary/20
+                                          cursor-pointer
+                                        " />
+                                    </label>
+
+                                    <button type="submit"
+                                        class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-gray-900 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all transform hover:scale-[1.02]">
+                                        <i class="ri-sparkling-2-line mr-2"></i> Analyze & Generate Copy
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Headline
+                                    (English)</label>
+                                <input type="text"
+                                    value="<%= (campaign.concept_data && campaign.concept_data.headline_en) ? campaign.concept_data.headline_en : '' %>"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pronto-primary focus:ring-pronto-primary sm:text-lg font-semibold py-3 px-4 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500">
+                            </div>
+
+                            <!-- Caption -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Caption
+                                    (Bengali)</label>
+                                <textarea id="captionInput" rows="8"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pronto-primary focus:ring-pronto-primary sm:text-base leading-relaxed py-3 px-4 font-bengali dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500"><%= (campaign.concept_data && campaign.concept_data.caption_bn) ? campaign.concept_data.caption_bn : '' %></textarea>
+                            </div>
+
+                            <!-- Reasoning -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
+                                    Strategy Note</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 italic">
+                                    <%= (campaign.concept_data && campaign.concept_data.reasoning) ?
+                                        campaign.concept_data.reasoning : 'No strategy note yet.' %>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Brand Chat -->
+                <div id="tabChat" class="hidden flex-col h-full bg-transparent">
+                    <!-- Chat History -->
+                    <div id="chatHistory" class="flex-grow overflow-y-auto p-6 space-y-4">
+                        <!-- Default Welcome Message -->
+                        <div class="flex items-start">
+                            <div
+                                class="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                                AI
+                            </div>
+                            <div
+                                class="ml-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm text-gray-800 dark:text-gray-200 max-w-[85%]">
+                                <p>Hello! I am your AI Brand Manager for <strong>
+                                        <%= dna.business_name %>
+                                    </strong>.</p>
+                                <p class="mt-1">I can help you write new captions, improve headlines, or brainstorm
+                                    ideas.
+                                    What do you need?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div
+                        class="p-4 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border-t border-gray-200 dark:border-gray-800">
+                        <div class="flex space-x-3">
+                            <textarea id="chatInput" rows="1" placeholder="Ask anything about this campaign..."
+                                class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-pronto-primary focus:ring-pronto-primary sm:text-sm resize-none py-3 px-4 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500"
+                                onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendChatMessage(); }"></textarea>
+                            <button onclick="sendChatMessage()" id="sendBtn"
+                                class="inline-flex items-center justify-center p-3 border border-transparent rounded-lg shadow-sm text-white bg-pronto-primary hover:bg-blue-700 focus:outline-none transition-colors">
+                                <svg class="h-5 w-5 rotate-90 transform" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mt-2 flex justify-between items-center text-xs text-gray-400 px-1">
+                            <span>Brand Voice: <%= dna.tone_tags && Array.isArray(dna.tone_tags) ?
+                                    dna.tone_tags.slice(0, 3).join(', ') : ' Not set' %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Visual Studio -->
+            <div class="w-1/2 bg-transparent overflow-y-auto p-8">
+                <div class="max-w-2xl mx-auto space-y-8">
+                    <div>
+                        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Visual Assets</h2>
+
+                        <!-- Image Prompt -->
+                        <div
+                            class="bg-white/40 dark:bg-gray-900/40 backdrop-blur-md rounded-xl shadow-sm border border-white/20 dark:border-gray-700/50 p-1 mb-6">
+                            <div class="p-4 border-b border-white/10 dark:border-gray-800/50">
+                                <label
+                                    class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-2">AI
+                                    Visual
+                                    Prompt</label>
+
+                                <%# ... skipping style chips for brevity as they are too many ... %>
+                                    <textarea id="promptInput" rows="3"
+                                        class="block w-full border-none p-0 focus:ring-0 text-gray-700 dark:text-gray-200 text-sm resize-none bg-transparent dark:placeholder-gray-400"
+                                        placeholder="Describe the image you want..."><%= (campaign.concept_data && campaign.concept_data.visual_prompt) ? campaign.concept_data.visual_prompt : '' %></textarea>
+                            </div>
+                            <div
+                                class="bg-black/5 dark:bg-white/5 px-4 py-3 rounded-b-xl flex justify-between items-center">
+                                <button onclick="refineVisualPrompt()"
+                                    class="text-xs text-blue-600 hover:text-blue-700 flex items-center">
+                                    <i class="ri-magic-line mr-1"></i> Refine with Brand DNA
+                                </button>
+                                <button id="generateBtn" onclick="generateImage()"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <span id="btnText">Generate Image</span>
+                                    <svg id="btnLoader" class="animate-spin ml-2 h-4 w-4 hidden"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <script>
+                                async function refineVisualPrompt() {
+                                    const btn = event.currentTarget;
+                                    const originalText = btn.innerHTML;
+                                    btn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Refining...';
+                                    btn.disabled = true;
+
+                                    try {
+                                        const res = await fetch('/campaign/<%= campaign.id %>/generate-visual-prompt', { method: 'POST' });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                            document.getElementById('promptInput').value = data.prompt;
+                                        } else {
+                                            alert('Failed to refine prompt');
+                                        }
+                                    } catch (e) {
+                                        console.error(e);
+                                        alert('Error refining prompt');
+                                    } finally {
+                                        btn.innerHTML = originalText;
+                                        btn.disabled = false;
+                                    }
+                                }
+                            </script>
+                        </div>
+
+                        <!-- View Toggle & Badge Selector -->
+                        <div class="flex justify-between items-center mb-6">
+                            <div
+                                class="bg-black/5 dark:bg-white/10 p-1 rounded-lg inline-flex items-center border border-white/10 dark:border-gray-800/50 backdrop-blur-md">
+                                <button onclick="toggleView('raw')" id="btnRaw"
+                                    class="px-4 py-1.5 text-sm font-semibold rounded-md shadow-sm bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white transition-all">Raw</button>
+                                <button onclick="toggleView('social')" id="btnSocial"
+                                    class="px-4 py-1.5 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all">Social</button>
+                            </div>
+
+                            <!-- Badge Dropdown -->
+                            <div class="flex items-center space-x-4">
+                                <!-- Format Selector -->
+                                <div class="flex items-center space-x-1 bg-gray-50 rounded-lg p-1 border border-gray-200"
+                                    id="formatSelector">
+                                    <button onclick="setFormat('square')"
+                                        class="p-1.5 rounded bg-white shadow-sm text-pronto-primary transition-all"
+                                        title="Square (1:1)" id="btnFormatSquare">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="setFormat('story')"
+                                        class="p-1.5 rounded hover:bg-white hover:shadow-sm text-gray-400 hover:text-pronto-primary transition-all"
+                                        title="Story (9:16)" id="btnFormatStory">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <rect x="5" y="3" width="14" height="18" rx="2" stroke-width="2" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="setFormat('landscape')"
+                                        class="p-1.5 rounded hover:bg-white hover:shadow-sm text-gray-400 hover:text-pronto-primary transition-all"
+                                        title="Landscape (16:9)" id="btnFormatLandscape">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <rect x="3" y="5" width="18" height="14" rx="2" stroke-width="2" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-xs font-bold text-gray-400 uppercase">Badge:</label>
+                                    <select onchange="toggleBadge(this.value)"
+                                        class="text-sm border-gray-200 rounded-md shadow-sm focus:border-pronto-primary focus:ring focus:ring-pronto-primary focus:ring-opacity-50 py-1.5 pl-3 pr-8 bg-white cursor-pointer hover:border-gray-300 transition-colors">
+                                        <option value="None">None</option>
+                                        <option value="50% OFF">50% OFF</option>
+                                        <option value="New Arrival">New Arrival</option>
+                                        <option value="Limited Time">Limited Time</option>
+                                        <option value="Best Seller">Best Seller</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Raw View -->
+                        <div id="viewRaw" class="relative group">
+                            <div id="imageContainer"
+                                class="aspect-square w-full bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shadow-sm relative">
+                                <!-- Placeholder -->
+                                <div id="placeholder" class="text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-300" stroke="currentColor" fill="none"
+                                        viewBox="0 0 48 48">
+                                        <path
+                                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="mt-1 text-sm text-gray-500">Image Preview</p>
+                                </div>
+
+                                <!-- Result Image -->
+                                <img id="resultImage" src="" alt="Generated Asset"
+                                    class="w-full h-full object-cover hidden">
+                            </div>
+
+                            <!-- Actions Overlay (Only visible when image exists) -->
+                            <div id="imageActions" class="absolute bottom-4 right-4 hidden flex items-center space-x-2">
+                                <span id="providerBadge"
+                                    class="hidden inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-800 shadow-sm border border-gray-200">
+                                    <!-- Injected by JS -->
+                                </span>
+                                <button id="saveAssetBtn" onclick="saveCurrentAsset()" style="display:none;"
+                                    class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                                    💾 Save to Project
+                                </button>
+                                <a id="downloadLink" href="#" target="_blank" download="campaign-asset.jpg"
+                                    class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Download
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Social View (Instagram Mockup) -->
+                        <div id="viewSocial" class="hidden">
+                            <div id="socialCard"
+                                class="bg-white rounded-xl shadow-lg border border-gray-100 max-w-sm mx-auto overflow-hidden ring-1 ring-black/5">
+                                <!-- Header -->
+                                <div class="px-4 py-3 flex items-center space-x-3 border-b border-gray-50">
+                                    <div
+                                        class="h-8 w-8 rounded-full bg-gradient-to-tr from-yellow-400 to-pink-500 p-[2px]">
+                                        <img crossorigin="anonymous"
+                                            src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(dna.business_name) %>&background=fff&color=000"
+                                            class="rounded-full object-cover h-full w-full border border-white">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 leading-none">
+                                            <%= dna.business_name.toLowerCase().replace(/\s+/g, '_' ) %>
+                                        </p>
+                                        <p class="text-[10px] text-gray-500 leading-none mt-0.5">Sponsored</p>
+                                    </div>
+                                    <div class="ml-auto text-gray-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Image -->
+                                <div id="socialImageContainer"
+                                    class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden relative transition-all duration-300">
+                                    <img id="socialImage" crossorigin="anonymous" src=""
+                                        class="w-full h-full object-cover hidden">
+
+                                    <!-- Smart Overlay / Badge -->
+                                    <div id="socialBadge"
+                                        class="hidden absolute top-4 right-4 z-10 font-bold uppercase tracking-wider text-xs px-3 py-1.5 rounded-full shadow-md transform -rotate-2">
+                                        BADGE
+                                    </div>
+                                    <div id="socialPlaceholder"
+                                        class="flex flex-col items-center justify-center text-gray-400">
+                                        <svg class="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                        <span class="text-xs">Preview Area</span>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="px-4 py-3">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex space-x-4">
+                                            <svg class="w-6 h-6 text-gray-800 hover:text-red-500 cursor-pointer transition-colors"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                                </path>
+                                            </svg>
+                                            <svg class="w-6 h-6 text-gray-800 cursor-pointer" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                                </path>
+                                            </svg>
+                                            <svg class="w-6 h-6 text-gray-800 cursor-pointer" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                            </svg>
+                                        </div>
+                                        <svg class="w-6 h-6 text-gray-800 cursor-pointer" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Likes & Caption -->
+                                    <p class="text-sm font-bold text-gray-900 mb-1">2,429 likes</p>
+                                    <div class="text-sm text-gray-900 leading-tight">
+                                        <span class="font-bold mr-1">
+                                            <%= dna.business_name.toLowerCase().replace(/\s+/g, '_' ) %>
+                                        </span>
+                                        <span id="socialCaption" class="text-gray-700 font-bengali">
+                                            <%= (campaign.concept_data && campaign.concept_data.caption_bn) ?
+                                                campaign.concept_data.caption_bn : '' %>
+                                        </span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-wide">2 HOURS AGO</p>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="max-w-sm mx-auto mt-4 text-center">
+                                <button onclick="downloadMockup()"
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Download Post (PNG)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Asset Gallery -->
+                        <div class="mt-8">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Saved Assets (<%=
+                                    assets.length %>)</h3>
+                            <% if (assets.length===0) { %>
+                                <p class="text-sm text-gray-500 italic">No assets saved yet. Generate and save your
+                                    first
+                                    image above!</p>
+                                <% } else { %>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <% assets.forEach(function(asset) { %>
+                                            <div
+                                                class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm group">
+                                                <div class="aspect-square bg-gray-100">
+                                                    <img src="<%= asset.file_path %>" alt="Asset"
+                                                        class="w-full h-full object-cover">
+                                                </div>
+                                                <div class="p-3">
+                                                    <p class="text-xs text-gray-500 line-clamp-2">
+                                                        <%= asset.caption || 'No caption' %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <% }); %>
+                                    </div>
+                                    <% } %>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const campaignId = '<%= campaign.id %>';
+            const promptInput = document.getElementById('promptInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const resultImage = document.getElementById('resultImage');
+            const placeholder = document.getElementById('placeholder');
+            const imageActions = document.getElementById('imageActions');
+            const providerBadge = document.getElementById('providerBadge');
+            const saveAssetBtn = document.getElementById('saveAssetBtn');
+            const downloadLink = document.getElementById('downloadLink');
+            const captionInput = document.getElementById('captionInput');
+
+            // Chat Elements
+            const chatInput = document.getElementById('chatInput');
+            const chatHistory = document.getElementById('chatHistory');
+            const sendBtn = document.getElementById('sendBtn');
+            const tabEditBtn = document.getElementById('tabEditBtn');
+            const tabChatBtn = document.getElementById('tabChatBtn');
+            const tabEdit = document.getElementById('tabEdit');
+            const tabChat = document.getElementById('tabChat');
+
+            function switchTab(tab) {
+                if (tab === 'edit') {
+                    tabEdit.classList.remove('hidden');
+                    tabChat.classList.add('hidden');
+                    tabEditBtn.classList.add('border-pronto-primary', 'text-pronto-primary');
+                    tabEditBtn.classList.remove('border-transparent', 'text-gray-500');
+                    tabChatBtn.classList.remove('border-pronto-primary', 'text-pronto-primary');
+                    tabChatBtn.classList.add('border-transparent', 'text-gray-500');
+                } else {
+                    tabEdit.classList.add('hidden');
+                    tabChat.classList.remove('hidden');
+                    tabChat.classList.add('flex');
+                    tabChatBtn.classList.add('border-pronto-primary', 'text-pronto-primary');
+                    tabChatBtn.classList.remove('border-transparent', 'text-gray-500');
+                    tabEditBtn.classList.remove('border-pronto-primary', 'text-pronto-primary');
+                    tabEditBtn.classList.add('border-transparent', 'text-gray-500');
+                }
+            }
+
+            async function sendChatMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // 1. User Message UI
+                appendMessage('user', message);
+                chatInput.value = '';
+
+                // 2. Loading UI
+                const loaderId = appendLoader();
+                scrollChat();
+
+                try {
+                    // 3. API Call
+                    const response = await fetch(`/campaign/${campaignId}/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message })
+                    });
+
+                    const result = await response.json();
+
+                    // Remove loader
+                    document.getElementById(loaderId).remove();
+
+                    if (result.success) {
+                        appendMessage('ai', result.reply);
+                    } else {
+                        appendMessage('error', 'Sorry, I couldn\'t process that. Please try again.');
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    if (document.getElementById(loaderId)) document.getElementById(loaderId).remove();
+                    appendMessage('error', 'Connection failed.');
+                }
+                scrollChat();
+            }
+
+            function appendMessage(role, text) {
+                const div = document.createElement('div');
+                div.className = "flex items-start " + (role === 'user' ? "justify-end" : "");
+
+                let html = '';
+                if (role === 'ai') {
+                    html = `
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">AI</div>
+                    <div class="ml-3 max-w-[85%]">
+                        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm text-gray-800 dark:text-gray-200 prose prose-sm dark:prose-invert">
+                            ${marked.parse(text)}
+                        </div>
+                        <button onclick="applyCaption(unescape('${escape(text)}'))" class="mt-2 ml-1 text-xs bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded-md inline-flex items-center transition-colors border border-gray-200 dark:border-gray-700 hover:border-blue-200 shadow-sm group">
+                            <span class="mr-1.5 group-hover:scale-110 transition-transform">📝</span> Use as Caption
+                        </button>
+                    </div>
+                `;
+                } else if (role === 'user') {
+                    html = `
+                    <div class="mr-3 bg-blue-600 text-white rounded-2xl rounded-tr-none px-4 py-3 shadow-sm text-sm max-w-[85%]">
+                        ${text.replace(/\n/g, '<br>')}
+                    </div>
+                     <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-bold shadow-sm">You</div>
+                `;
+                } else if (role === 'error') {
+                    html = `
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-xs font-bold shadow-sm">!</div>
+                    <div class="ml-3 bg-red-50 border border-red-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm text-red-800 max-w-[85%]">
+                        ${text}
+                    </div>
+                `;
+                }
+                div.innerHTML = html;
+                chatHistory.appendChild(div);
+            }
+
+            function appendLoader() {
+                const id = 'loader-' + Date.now();
+                const div = document.createElement('div');
+                div.id = id;
+                div.className = "flex items-start";
+                div.innerHTML = `
+                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">AI</div>
+                <div class="ml-3 bg-white border border-gray-200 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm text-sm text-gray-400">
+                    <span class="inline-flex gap-1">
+                        <span class="animate-bounce delay-0">.</span>
+                        <span class="animate-bounce delay-100">.</span>
+                        <span class="animate-bounce delay-200">.</span>
+                    </span>
+                </div>
+            `;
+                chatHistory.appendChild(div);
+                return id;
+            }
+
+            function applyCaption(text) {
+                // 1. Clean Text (remove quotes if wrapping the whole string)
+                let cleanText = text.trim();
+                if (cleanText.startsWith('"') && cleanText.endsWith('"')) {
+                    cleanText = cleanText.substring(1, cleanText.length - 1);
+                }
+
+                // 2. Switch Tab
+                switchTab('edit');
+
+                // 3. Update Input
+                captionInput.value = cleanText;
+
+                // 4. Update Preview (trigger input event)
+                const event = new Event('input', { bubbles: true });
+                captionInput.dispatchEvent(event);
+
+                // 5. Visual Feedback
+                captionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                captionInput.classList.add('bg-yellow-50', 'transition-colors', 'duration-500');
+                setTimeout(() => {
+                    captionInput.classList.remove('bg-yellow-50');
+                }, 1000);
+            }
+
+            function scrollChat() {
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+
+            // Social Elements
+            const btnRaw = document.getElementById('btnRaw');
+            const btnSocial = document.getElementById('btnSocial');
+            const viewRaw = document.getElementById('viewRaw');
+            const viewSocial = document.getElementById('viewSocial');
+            const socialImage = document.getElementById('socialImage');
+            const socialPlaceholder = document.getElementById('socialPlaceholder');
+            const socialCaption = document.getElementById('socialCaption');
+
+            let currentImageUrl = null;
+
+            // View Toggling
+            function toggleView(mode) {
+                if (mode === 'raw') {
+                    viewRaw.classList.remove('hidden');
+                    viewSocial.classList.add('hidden');
+
+                    // Active State for Raw
+                    btnRaw.classList.add('bg-white', 'text-gray-900', 'shadow-sm', 'ring-1', 'ring-gray-200');
+                    btnRaw.classList.remove('text-gray-500', 'hover:text-gray-900');
+
+                    // Inactive State for Social
+                    btnSocial.classList.remove('bg-white', 'text-gray-900', 'shadow-sm', 'ring-1', 'ring-gray-200');
+                    btnSocial.classList.add('text-gray-500', 'hover:text-gray-900');
+                } else {
+                    viewRaw.classList.add('hidden');
+                    viewSocial.classList.remove('hidden');
+
+                    // Active State for Social
+                    btnSocial.classList.add('bg-white', 'text-gray-900', 'shadow-sm', 'ring-1', 'ring-gray-200');
+                    btnSocial.classList.remove('text-gray-500', 'hover:text-gray-900');
+
+                    // Inactive State for Raw
+                    btnRaw.classList.remove('bg-white', 'text-gray-900', 'shadow-sm', 'ring-1', 'ring-gray-200');
+                    btnRaw.classList.add('text-gray-500', 'hover:text-gray-900');
+                }
+            }
+
+            // Live Caption Sync
+            captionInput.addEventListener('input', (e) => {
+                socialCaption.innerText = e.target.value;
+            });
+
+            async function generateImage() {
+                const prompt = promptInput.value;
+                if (!prompt) return;
+
+                // Loading state
+                generateBtn.disabled = true;
+                btnText.innerText = "Generating...";
+                btnLoader.classList.remove('hidden');
+
+                try {
+                    const response = await fetch(`/campaign/${campaignId}/generate-image`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success && result.imageUrl) {
+                        // Update Image
+                        resultImage.src = result.imageUrl;
+                        resultImage.onload = () => {
+                            resultImage.classList.remove('hidden');
+                            placeholder.classList.add('hidden');
+                            imageActions.classList.remove('hidden');
+
+                            // Update Social Mockup
+                            socialImage.crossOrigin = "anonymous";
+                            socialImage.src = result.imageUrl;
+                            socialImage.classList.remove('hidden');
+                            socialPlaceholder.classList.add('hidden');
+
+                            // Sync Caption (in case it wasn't synced yet)
+                            socialCaption.innerText = captionInput.value;
+
+                            // Update Badge
+                            providerBadge.classList.remove('hidden');
+                            if (result.imageUrl.includes('pollinations')) {
+                                providerBadge.innerText = 'Example: Pollinations';
+                                providerBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 shadow-sm border border-yellow-200';
+                            } else {
+                                providerBadge.innerText = 'AI Generated';
+                                providerBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-50 text-green-700 shadow-sm border border-green-200';
+                            }
+
+                            // Store for saving
+                            currentImageUrl = result.imageUrl;
+                            saveAssetBtn.style.display = 'inline-flex';
+
+                            downloadLink.href = result.imageUrl;
+
+                            // Reset button
+                            generateBtn.disabled = false;
+                            btnText.innerText = "Regenerate";
+                            btnLoader.classList.add('hidden');
+                        };
+                    } else {
+                        alert('Error: ' + (result.error || 'Failed'));
+                        generateBtn.disabled = false;
+                        btnText.innerText = "Generate Image";
+                        btnLoader.classList.add('hidden');
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Connection failed');
+                    generateBtn.disabled = false;
+                    btnText.innerText = "Generate Image";
+                    btnLoader.classList.add('hidden');
+                }
+            }
+
+            async function saveCurrentAsset() {
+                if (!currentImageUrl) {
+                    alert('No image to save. Generate an image first.');
+                    return;
+                }
+
+                saveAssetBtn.disabled = true;
+                saveAssetBtn.innerText = 'Saving...';
+
+                try {
+                    const response = await fetch(`/campaign/${campaignId}/save-asset`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'image',
+                            file_path: currentImageUrl,
+                            caption: promptInput.value
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Reload to show in gallery
+                        window.location.reload();
+                    } else {
+                        alert('Failed to save: ' + (result.error || 'Unknown error'));
+                        saveAssetBtn.disabled = false;
+                        saveAssetBtn.innerText = '💾 Save to Project';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Connection failed');
+                    saveAssetBtn.disabled = false;
+                    saveAssetBtn.innerText = '💾 Save to Project';
+                }
+            }
+
+            // Style Chips Logic
+            function toggleStyle(btn, keyword) {
+                let currentPrompt = promptInput.value;
+                const styleTerm = ", " + keyword;
+
+                // Check existence (simple check, can be improved with regex for exact word boundaries)
+                if (currentPrompt.includes(keyword)) {
+                    // Remove
+                    // Try removing with comma first
+                    if (currentPrompt.includes(styleTerm)) {
+                        currentPrompt = currentPrompt.replace(styleTerm, "");
+                    } else if (currentPrompt.includes(keyword)) {
+                        // Fallback if it was manually typed at start or without comma
+                        currentPrompt = currentPrompt.replace(keyword, "").replace(/,\s*,/g, ",").trim();
+                    }
+
+                    // Set Inactive Style
+                    btn.className = "px-3 py-1 text-xs font-medium rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 transition-colors";
+                } else {
+                    // Add
+                    // Only add comma if there is text and it doesn't end with one
+                    if (currentPrompt.length > 0 && !currentPrompt.endsWith(", ")) {
+                        currentPrompt += styleTerm;
+                    } else {
+                        currentPrompt += keyword;
+                    }
+
+                    // Set Active Style
+                    btn.className = "px-3 py-1 text-xs font-medium rounded-full border border-blue-600 bg-blue-600 text-white transition-colors shadow-sm";
+                }
+
+                promptInput.value = currentPrompt;
+            }
+
+
+
+            // Badge Logic
+            function toggleBadge(badgeText) {
+                const badge = document.getElementById('socialBadge');
+
+                if (badgeText === 'None') {
+                    badge.classList.add('hidden');
+                } else {
+                    badge.innerText = badgeText;
+                    badge.classList.remove('hidden');
+
+                    // Reset classes
+                    badge.className = "absolute top-4 right-4 z-10 font-bold uppercase tracking-wider text-xs px-3 py-1.5 rounded-full shadow-md transform -rotate-2";
+
+                    // Color Logic
+                    if (badgeText.includes('%') || badgeText === 'Limited Time') {
+                        badge.classList.add('bg-red-600', 'text-white', 'border', 'border-red-700');
+                    } else if (badgeText === 'New Arrival') {
+                        badge.classList.add('bg-emerald-500', 'text-white', 'border', 'border-emerald-600');
+                    } else if (badgeText === 'Best Seller') {
+                        badge.classList.add('bg-yellow-400', 'text-yellow-900', 'border', 'border-yellow-500');
+                    } else {
+                        badge.classList.add('bg-gray-900', 'text-white');
+                    }
+                }
+            }
+
+
+
+            // Magic Resize Logic
+            function setFormat(format) {
+                const container = document.getElementById('socialImageContainer');
+                const card = document.getElementById('socialCard');
+                const badge = document.getElementById('socialBadge');
+
+                // Buttons
+                const btnSquare = document.getElementById('btnFormatSquare');
+                const btnStory = document.getElementById('btnFormatStory');
+                const btnLandscape = document.getElementById('btnFormatLandscape');
+
+                // Reset Classes
+                container.classList.remove('aspect-square', 'aspect-[9/16]', 'aspect-video');
+                card.classList.remove('max-w-sm', 'max-w-xs', 'max-w-lg');
+
+                // Reset Buttons
+                [btnSquare, btnStory, btnLandscape].forEach(btn => {
+                    btn.className = "p-1.5 rounded hover:bg-white hover:shadow-sm text-gray-400 hover:text-pronto-primary transition-all";
+                });
+
+                // Apply New Format
+                if (format === 'square') {
+                    container.classList.add('aspect-square');
+                    card.classList.add('max-w-sm');
+                    btnSquare.className = "p-1.5 rounded bg-white shadow-sm text-pronto-primary transition-all";
+
+                    // Badge Position: Default (Top Right)
+                    badge.classList.remove('top-12', 'left-1/2', '-translate-x-1/2');
+                    badge.classList.add('top-4', 'right-4');
+
+                } else if (format === 'story') {
+                    container.classList.add('aspect-[9/16]');
+                    card.classList.add('max-w-xs');
+                    btnStory.className = "p-1.5 rounded bg-white shadow-sm text-pronto-primary transition-all";
+
+                    // Badge Position: Center Top for Story
+                    badge.classList.remove('top-4', 'right-4');
+                    badge.classList.add('top-12', 'left-1/2', '-translate-x-1/2');
+
+                } else if (format === 'landscape') {
+                    container.classList.add('aspect-video');
+                    card.classList.add('max-w-lg');
+                    btnLandscape.className = "p-1.5 rounded bg-white shadow-sm text-pronto-primary transition-all";
+
+                    // Badge Position: Default
+                    badge.classList.remove('top-12', 'left-1/2', '-translate-x-1/2');
+                    badge.classList.add('top-4', 'right-4');
+                }
+            }
+
+            // Initialize Chips State on Load (Optional refinement)
+            // We could loop through buttons and set active state if keyword exists in initial prompt
+            document.addEventListener('DOMContentLoaded', () => {
+                const initialPrompt = promptInput.value;
+                // Select all buttons inside the style chips container
+                // identifying them by their onclick attribute content is a bit hacky but works for this specific setup
+                const buttons = document.querySelectorAll('button[onclick^="toggleStyle"]');
+                buttons.forEach(btn => {
+                    const keywordMatch = btn.getAttribute('onclick').match(/'([^']+)'/);
+                    if (keywordMatch && keywordMatch[1] && initialPrompt.includes(keywordMatch[1])) {
+                        btn.className = "px-3 py-1 text-xs font-medium rounded-full border border-blue-600 bg-blue-600 text-white transition-colors shadow-sm";
+                    }
+                });
+            });
+
+            async function downloadMockup() {
+                const element = document.getElementById('socialCard');
+                if (!element) return;
+
+                try {
+                    // Use html2canvas with CORS options
+                    const canvas = await html2canvas(element, {
+                        scale: 2, // Retina quality
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: null
+                    });
+
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = 'social-post-preview.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch (err) {
+                    console.error('Export failed:', err);
+                    alert('Export failed. Note: Some AI images may be protected from direct canvas export due to CORS.');
+                }
+            }
+        </script>
+</body>
+
+</html>

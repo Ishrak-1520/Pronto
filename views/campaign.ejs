@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pronto: {
+                            primary: '#2563EB', // Blue 600
+                            secondary: '#7C3AED', // Violet 600
+                            accent: '#10B981', // Emerald 500
+                            surface: '#FFFFFF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body
+    class="font-sans antialiased text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <%- include('partials/background') %>
+        <div class="min-h-screen flex flex-col relative z-10">
+            <!-- Header -->
+            <%- include('partials/header') %>
+
+                <!-- Main Content -->
+                <main class="flex-grow py-12 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-5xl mx-auto space-y-12">
+
+                        <!-- Generator Header -->
+                        <!-- Generator Header -->
+                        <div class="text-center max-w-2xl mx-auto">
+                            <div class="flex flex-col items-center mb-6">
+                                <label for="business-selector" class="sr-only">Select Business</label>
+                                <div class="relative inline-block text-left mb-2">
+                                    <select id="business-selector"
+                                        onchange="window.location.href='/campaign?dna_id=' + this.value"
+                                        class="appearance-none bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 py-2 pl-4 pr-10 rounded-full text-sm font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-pronto-primary focus:border-transparent cursor-pointer hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all backdrop-blur-sm">
+                                        <% businesses.forEach(function(b) { %>
+                                            <option value="<%= b.id %>" <%=dna.id===b.id ? 'selected' : '' %>>
+                                                <%= b.business_name %>
+                                            </option>
+                                            <% }); %>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <h1
+                                    class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl tracking-tight">
+                                    New Campaign
+                                </h1>
+                            </div>
+
+                            <p class="text-lg text-gray-500 dark:text-gray-400">Launch your new marketing initiative.
+                            </p>
+                        </div>
+
+                        <!-- Input Section -->
+                        <div
+                            class="bg-white/60 dark:bg-gray-800/80 backdrop-blur-md shadow-lg rounded-2xl border border-white/50 dark:border-gray-700/50 p-8 transform transition-all hover:shadow-xl">
+                            <form action="/campaign/create" method="POST" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                    <!-- Campaign Title -->
+                                    <div class="md:col-span-2">
+                                        <label for="title"
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Campaign
+                                            Title</label>
+                                        <input type="text" id="title" name="title" placeholder="e.g. Summer Sale 2024"
+                                            required
+                                            class="block w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-pronto-primary focus:ring focus:ring-pronto-primary focus:ring-opacity-20 py-3 px-4 bg-gray-50/50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-shadow">
+                                    </div>
+
+                                    <!-- Goal Select -->
+                                    <div>
+                                        <label for="goal"
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Campaign
+                                            Goal</label>
+                                        <div class="relative">
+                                            <select id="goal" name="goal" required
+                                                class="block w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-pronto-primary focus:ring focus:ring-pronto-primary focus:ring-opacity-20 py-3 px-4 bg-gray-50/50 dark:bg-gray-700 text-gray-900 dark:text-white transition-shadow appearance-none cursor-pointer">
+                                                <option value="" disabled selected>Select a goal...</option>
+                                                <option value="Sales">Drive Sales</option>
+                                                <option value="Brand Awareness">Brand Awareness</option>
+                                                <option value="Engagement">Social Engagement</option>
+                                                <option value="New Product Launch">New Product Launch</option>
+                                            </select>
+                                            <div
+                                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Platform Select -->
+                                    <div>
+                                        <label for="platform"
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Platform</label>
+                                        <div class="relative">
+                                            <select id="platform" name="platform" required
+                                                class="block w-full rounded-xl border-gray-300 dark:border-gray-600 shadow-sm focus:border-pronto-primary focus:ring focus:ring-pronto-primary focus:ring-opacity-20 py-3 px-4 bg-gray-50/50 dark:bg-gray-700 text-gray-900 dark:text-white transition-shadow appearance-none cursor-pointer">
+                                                <option value="" disabled selected>Select platform...</option>
+                                                <option value="Instagram">Instagram</option>
+                                                <option value="LinkedIn">LinkedIn</option>
+                                                <option value="Facebook">Facebook</option>
+                                                <option value="Twitter">Twitter</option>
+                                                <option value="Email">Email</option>
+                                            </select>
+                                            <div
+                                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="flex justify-center pt-4">
+                                    <button type="submit"
+                                        class="inline-flex items-center px-8 py-4 border border-transparent text-base font-bold rounded-full shadow-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pronto-primary transform transition-all hover:-translate-y-1 hover:shadow-xl w-full md:w-auto">
+                                        <span><i class="ri-add-circle-line mr-2"></i>Create Campaign</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Concept Deck (Results) -->
+                        <div id="resultsArea" class="hidden">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                                <span class="mr-2"><i class="ri-lightbulb-flash-line text-yellow-500"></i></span>
+                                Generated Concepts
+                            </h2>
+
+                            <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                <!-- Cards will be injected here -->
+                            </div>
+                        </div>
+
+                    </div>
+                </main>
+
+                <!-- Footer -->
+                <footer class="bg-white border-t border-gray-100 mt-auto">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+                            &copy; <%= new Date().getFullYear() %> Pronto. Built for Business.
+                        </p>
+                    </div>
+                </footer>
+        </div>
+
+        <!-- Toast Component -->
+        <div id="toast"
+            class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300">
+            <div class="bg-gray-900 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center">
+                <svg class="w-6 h-6 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span id="toastMsg" class="font-medium">Success!</span>
+            </div>
+        </div>
+
+
+
+        <style>
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Add Bengali font support if needed, otherwise fallback to sans */
+            .font-bengali {
+                font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            }
+        </style>
+</body>
+
+</html>
