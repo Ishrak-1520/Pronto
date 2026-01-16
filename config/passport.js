@@ -37,25 +37,23 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-    // In this simple mock, we just return the mock user if ID matches
-    if (id === 1) {
-        return done(null, mockUser);
-    }
-
-    // Fallback to DB if needed for other users
     try {
+        // FIX: If it's our Mock Admin (ID 1 as number or string), return data immediately (Skip DB)
+        if (id == 1) {
+            return done(null, mockUser);
+        }
+
+        // Otherwise, look for real users in DB
         const [users] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
         if (users.length > 0) {
             done(null, users[0]);
         } else {
-            done(null, null);
+            done(null, null); // User not found
         }
     } catch (err) {
+        console.error("Deserialize Error:", err);
         done(err, null);
     }
 });
-
-module.exports = passport;
-
 
 module.exports = passport;
