@@ -13,7 +13,7 @@ const db = require('../config/db');
 router.get('/', async (req, res) => {
     try {
         // 1. Fetch ALL businesses for dropdown
-        const [businesses] = await db.query('SELECT id, business_name FROM business_dna WHERE user_id = ? ORDER BY id DESC', [req.session.user.id]);
+        const [businesses] = await db.query('SELECT id, business_name FROM business_dna WHERE user_id = ? ORDER BY id DESC', [req.user.id]);
 
         if (businesses.length === 0) {
             return res.redirect('/dna');
@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
         }
 
         // 3. Fetch full DNA details
-        const [rows] = await db.query('SELECT * FROM business_dna WHERE id = ? AND user_id = ?', [dnaId, req.session.user.id]);
+        const [rows] = await db.query('SELECT * FROM business_dna WHERE id = ? AND user_id = ?', [dnaId, req.user.id]);
 
         if (rows.length === 0) {
             // Fallback if ID invalid
@@ -61,7 +61,7 @@ router.post('/generate', async (req, res) => {
 
     try {
         // 1. Fetch DNA
-        const [rows] = await db.query('SELECT * FROM business_dna WHERE id = ? AND user_id = ?', [dna_id, req.session.user.id]);
+        const [rows] = await db.query('SELECT * FROM business_dna WHERE id = ? AND user_id = ?', [dna_id, req.user.id]);
         if (rows.length === 0) {
             return res.status(404).json({ success: false, error: 'Business DNA not found or access denied' });
         }
@@ -89,7 +89,7 @@ router.post('/generate', async (req, res) => {
 
 // POST /create - Create a new campaign (Manual)
 router.post('/create', async (req, res) => {
-    if (!req.session.user) return res.redirect('/auth/login');
+    if (!req.user) return res.redirect('/auth/login');
     const { title, platform, goal } = req.body; // 'goal' from form maps to objective/goal
 
     if (!title || !platform || !goal) {
@@ -100,7 +100,7 @@ router.post('/create', async (req, res) => {
 
     try {
         // Fetch the user's latest Business DNA to link (Required by DB)
-        const [businesses] = await db.query('SELECT id FROM business_dna WHERE user_id = ? ORDER BY id DESC LIMIT 1', [req.session.user.id]);
+        const [businesses] = await db.query('SELECT id FROM business_dna WHERE user_id = ? ORDER BY id DESC LIMIT 1', [req.user.id]);
 
         if (businesses.length === 0) {
             // Should not happen if middleware works, but handle it
@@ -111,7 +111,7 @@ router.post('/create', async (req, res) => {
 
         await db.query(
             `INSERT INTO campaigns (user_id, business_dna_id, title, primary_platforms, goal, status, created_at) VALUES (?, ?, ?, ?, ?, 'Draft', NOW())`,
-            [req.session.user.id, dnaId, title, JSON.stringify([platform]), goal]
+            [req.user.id, dnaId, title, JSON.stringify([platform]), goal]
         );
         res.redirect('/dashboard');
     } catch (error) {
@@ -122,10 +122,10 @@ router.post('/create', async (req, res) => {
 
 // GET /delete/:id - Delete a campaign
 router.get('/delete/:id', async (req, res) => {
-    if (!req.session.user) return res.redirect('/auth/login');
+    if (!req.user) return res.redirect('/auth/login');
     const campaignId = req.params.id;
     try {
-        await db.query('DELETE FROM campaigns WHERE id = ? AND user_id = ?', [campaignId, req.session.user.id]);
+        await db.query('DELETE FROM campaigns WHERE id = ? AND user_id = ?', [campaignId, req.user.id]);
         res.redirect('/dashboard');
     } catch (error) {
         console.error('Delete Error:', error);
@@ -144,7 +144,7 @@ router.post('/save', async (req, res) => {
     try {
         await db.query(
             `INSERT INTO campaigns (user_id, business_dna_id, title, goal, concept_data, status, created_at) VALUES (?, ?, ?, ?, ?, 'draft', NOW())`,
-            [req.session.user.id, dna_id, goal, goal, concept_data]
+            [req.user.id, dna_id, goal, goal, concept_data]
         );
 
         res.json({ success: true });
@@ -181,7 +181,7 @@ router.post('/:id/save-asset', async (req, res) => {
     try {
         await db.query(
             `INSERT INTO assets (user_id, campaign_id, type, file_path, caption, is_favorite) VALUES (?, ?, ?, ?, ?, 0)`,
-            [req.session.user.id, campaignId, type, file_path, caption || '']
+            [req.user.id, campaignId, type, file_path, caption || '']
         );
         res.json({ success: true });
     } catch (error) {
@@ -202,7 +202,7 @@ router.get('/:id', async (req, res) => {
             FROM campaigns c 
             LEFT JOIN business_dna b ON c.business_dna_id = b.id 
             WHERE c.id = ? AND c.user_id = ?
-        `, [campaignId, req.session.user.id]);
+        `, [campaignId, req.user.id]);
 
         if (rows.length === 0) {
             return res.status(404).send('Campaign not found');
@@ -258,7 +258,7 @@ router.post('/:id/chat', async (req, res) => {
             FROM campaigns c 
             JOIN business_dna b ON c.business_dna_id = b.id 
             WHERE c.id = ? AND c.user_id = ?
-        `, [campaignId, req.session.user.id]);
+        `, [campaignId, req.user.id]);
 
         if (rows.length === 0) {
             return res.status(404).json({ success: false, error: 'Campaign not found' });
@@ -312,7 +312,7 @@ router.post('/:id/generate-text', async (req, res) => {
             FROM campaigns c 
             JOIN business_dna b ON c.business_dna_id = b.id 
             WHERE c.id = ? AND c.user_id = ?
-        `, [campaignId, req.session.user.id]);
+        `, [campaignId, req.user.id]);
 
         if (rows.length === 0) {
             return res.status(404).send('Campaign not found');
@@ -393,7 +393,7 @@ router.post('/:id/generate-visual-prompt', async (req, res) => {
             FROM campaigns c 
             JOIN business_dna b ON c.business_dna_id = b.id 
             WHERE c.id = ? AND c.user_id = ?
-        `, [campaignId, req.session.user.id]);
+        `, [campaignId, req.user.id]);
 
         if (rows.length === 0) return res.status(404).json({ success: false, error: 'Campaign not found' });
 
@@ -455,7 +455,7 @@ router.post('/:id/publish', async (req, res) => {
     const campaignId = req.params.id;
     try {
         // 1. Fetch Campaign
-        const [rows] = await db.query('SELECT * FROM campaigns WHERE id = ? AND user_id = ?', [campaignId, req.session.user.id]);
+        const [rows] = await db.query('SELECT * FROM campaigns WHERE id = ? AND user_id = ?', [campaignId, req.user.id]);
         if (rows.length === 0) return res.status(404).json({ success: false, error: 'Campaign not found' });
 
         const campaign = rows[0];
@@ -499,7 +499,7 @@ router.post('/:id/analyze-image', upload.single('image'), async (req, res) => {
             FROM campaigns c 
             JOIN business_dna b ON c.business_dna_id = b.id 
             WHERE c.id = ? AND c.user_id = ?
-        `, [campaignId, req.session.user.id]);
+        `, [campaignId, req.user.id]);
 
         if (rows.length === 0) {
             return res.status(404).send('Campaign not found');

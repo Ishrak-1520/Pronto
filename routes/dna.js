@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
 
 // POST /analyze
 router.post('/analyze', async (req, res) => {
-    if (!req.session.user) return res.redirect('/auth/login');
+    if (!req.user) return res.redirect('/auth/login');
     const { website_url } = req.body;
 
     if (!website_url) {
@@ -83,7 +83,7 @@ router.post('/analyze', async (req, res) => {
 
 // POST /save
 router.post('/save', async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
     const { dna_data } = req.body;
     // Save to DB implementation
     try {
@@ -92,7 +92,7 @@ router.post('/save', async (req, res) => {
             (user_id, website_url, business_name, industry, primary_colors, fonts, tone_tags, keywords_bn, keywords_en, imagery_style, confidence_score) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                req.session.user.id,
+                req.user.id,
                 dna_data.website_url,
                 dna_data.business_name,
                 dna_data.industry,
