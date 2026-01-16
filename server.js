@@ -3,7 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const session = require('express-session');
-// const passport = require('./config/passport'); // DISABLED - Auth bypass
+const passport = require('./config/passport');
 
 dotenv.config();
 
@@ -26,25 +26,13 @@ app.use(session({
     }
 }));
 
-// DISABLED - Passport Middleware
-// app.use(passport.initialize());
-// app.use(passport.session());
+// Passport Middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
-// Auth bypass - inject dummy user for all requests
-const { ensureAuth } = require('./middleware/auth');
+// Make user available to all views
 app.use((req, res, next) => {
-    // Inject dummy user globally
-    req.user = {
-        id: 1,
-        name: "Guest User",
-        displayName: "Guest User",
-        email: "guest@pronto.com",
-        avatar_url: "https://via.placeholder.com/150",
-        company_name: "Pronto Demo"
-    };
-    req.session = req.session || {};
-    req.session.user = req.user;
-    res.locals.user = req.user;
+    res.locals.user = req.user || null;
     next();
 });
 
@@ -58,12 +46,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Landing Page
 app.get('/', (req, res) => {
-    res.render('landing', { user: req.session?.user || null });
+    res.render('landing', { user: req.user || null });
 });
 
-// DISABLED - Auth Routes
-// const authRoutes = require('./routes/auth');
-// app.use('/auth', authRoutes);
+// Import Routes
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
 
 const dnaRoutes = require('./routes/dna');
 app.use('/dna', dnaRoutes);

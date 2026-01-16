@@ -26,23 +26,8 @@ router.get('/register', (req, res) => {
     });
 });
 
-// GET /google
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// Google Auth - REMOVED for Local Login Bypass
 
-// GET /google/callback
-router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/auth/login' }),
-    (req, res) => {
-        // Successful authentication
-        req.session.user = {
-            id: req.user.id,
-            name: req.user.name,
-            email: req.user.email,
-            avatar_url: req.user.avatar_url
-        };
-        res.redirect('/dashboard');
-    }
-);
 
 // POST /register
 router.post('/register', async (req, res) => {
@@ -86,61 +71,35 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /login
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.render('login', {
-            title: 'Login | Pronto',
-            error: 'Email and password are required.'
-        });
-    }
-
-    try {
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-
-        if (users.length === 0) {
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            console.error('Passport auth error:', err);
+            return next(err);
+        }
+        if (!user) {
             return res.render('login', {
                 title: 'Login | Pronto',
-                error: 'Invalid email or password.'
+                error: info ? info.message : 'Invalid credentials'
             });
         }
-
-        const user = users[0];
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-
-        if (!isMatch) {
-            return res.render('login', {
-                title: 'Login | Pronto',
-                error: 'Invalid email or password.'
-            });
-        }
-
-        // Set session
-        req.session.user = {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        };
-
-        res.redirect('/dashboard');
-    } catch (error) {
-        console.error('Login error:', error);
-        res.render('login', {
-            title: 'Login | Pronto',
-            error: 'Login failed. Please try again.'
+        req.logIn(user, (err) => {
+            if (err) {
+                console.error('Login error:', err);
+                return next(err);
+            }
+            return res.redirect('/dashboard');
         });
-    }
+    })(req, res, next);
 });
 
 // GET /logout
-router.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Logout error:', err);
-        }
+router.get('/logout', (req, res, next) => {
+    req.logout((err) => {
+        if (err) { return next(err); }
         res.redirect('/');
     });
 });
 
 module.exports = router;
+
