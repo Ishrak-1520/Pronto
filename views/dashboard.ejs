@@ -37,9 +37,10 @@
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white transition-colors duration-300">
-    <% // Safeguards const campaignsSafe=typeof campaigns !=='undefined' ? campaigns : []; const dnaSafe=typeof dna
-        !=='undefined' ? dna : null; const userSafe=typeof user !=='undefined' ? user : (typeof locals.user
-        !=='undefined' ? locals.user : null); %>
+    <% // Safeguards const campaignsSafe=(typeof campaigns !=='undefined' && campaigns) ? campaigns : []; const
+        dnaSafe=(typeof dna !=='undefined' && dna) ? dna : null; const userSafe=(typeof user !=='undefined' && user) ?
+        user : (typeof locals.user !=='undefined' ? locals.user : null); const errorSafe=(typeof error !=='undefined' &&
+        error) ? error : null; %>
         <%- include('partials/background') %>
             <div class="min-h-screen flex flex-col relative">
                 <!-- Header -->
@@ -59,226 +60,254 @@
                                     <p class="text-gray-500 dark:text-gray-400 mt-1">Manage all your marketing campaigns
                                         in
                                         one
-                                        place.</p>
                                 </div>
-                            </div>
 
-                            <!-- Brand Passport Card -->
-                            <% if (dnaSafe) { %>
-                                <div
-                                    class="w-full bg-white/60 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-6 mb-8 border-l-4 border-pronto-primary flex flex-col md:flex-row items-center justify-between border border-white/50 dark:border-gray-700/50">
-                                    <!-- Identity -->
-                                    <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                                        <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full">
-                                            <i
-                                                class="ri-building-4-line text-2xl text-pronto-primary dark:text-blue-400"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                                                <%= userSafe.company_name || userSafe.name || 'My Business' %>
-                                            </h3>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                                <%= user.job_role || 'Marketing Manager' %>
-                                            </p>
-                                            <p
-                                                class="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
-                                                <%= dna.industry %>
-                                            </p>
-                                        </div>
+                                <% if (errorSafe) { %>
+                                    <div
+                                        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl text-red-700 dark:text-red-300 flex items-center space-x-3">
+                                        <i class="ri-error-warning-line text-xl"></i>
+                                        <p>
+                                            <%= errorSafe %>
+                                        </p>
                                     </div>
+                                    <% } %>
 
-                                    <!-- Attributes Wrapper -->
-                                    <div class="flex flex-col md:flex-row items-center gap-8 mb-4 md:mb-0">
+                                        <!-- Brand Passport Card -->
+                                        <% if (dnaSafe) { %>
+                                            <div
+                                                class="w-full bg-white/60 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg p-6 mb-8 border-l-4 border-pronto-primary flex flex-col md:flex-row items-center justify-between border border-white/50 dark:border-gray-700/50">
+                                                <!-- Identity -->
+                                                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                                                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full">
+                                                        <i
+                                                            class="ri-building-4-line text-2xl text-pronto-primary dark:text-blue-400"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                                                            <%= userSafe?.company_name || userSafe?.name
+                                                                || 'My Business' %>
+                                                        </h3>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                            <%= userSafe?.job_role || 'Marketing Manager' %>
+                                                        </p>
+                                                        <p
+                                                            class="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                                                            <%= dnaSafe?.industry || 'General' %>
+                                                        </p>
+                                                    </div>
+                                                </div>
 
-                                        <!-- Voice -->
-                                        <div class="flex flex-col items-center md:items-start">
-                                            <span
-                                                class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase mb-2">Brand
-                                                Voice</span>
-                                            <div class="flex space-x-2">
-                                                <% if (dna.tone_tags && dna.tone_tags.length) { %>
-                                                    <% dna.tone_tags.slice(0, 3).forEach(tag=> { %>
+                                                <!-- Attributes Wrapper -->
+                                                <div class="flex flex-col md:flex-row items-center gap-8 mb-4 md:mb-0">
+
+                                                    <!-- Voice -->
+                                                    <div class="flex flex-col items-center md:items-start">
                                                         <span
-                                                            class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
-                                                            <%= tag %>
-                                                        </span>
-                                                        <% }) %>
-                                                            <% } else { %>
-                                                                <span class="text-sm text-gray-400 italic">Not
-                                                                    defined</span>
-                                                                <% } %>
-                                            </div>
-                                        </div>
-
-                                        <!-- Visuals (Simulated) -->
-                                        <div class="flex flex-col items-center md:items-start">
-                                            <span
-                                                class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase mb-2">Brand
-                                                Palette</span>
-                                            <div class="flex space-x-[-8px]">
-                                                <% // Simple hash function to generate stable colors from name const
-                                                    str=dnaSafe.business_name || 'brand' ; let hash=0; for (let i=0; i <
-                                                    str.length; i++) { hash=str.charCodeAt(i) + ((hash << 5) - hash); }
-                                                    const c1=Math.abs(hash % 360); const c2=Math.abs((hash + 120) %
-                                                    360); const c3=Math.abs((hash + 240) % 360); %>
-                                                    <div class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
-                                                        style="background-color: hsl(<%= c1 %>, 70%, 60%);"></div>
-                                                    <div class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
-                                                        style="background-color: hsl(<%= c2 %>, 60%, 50%);"></div>
-                                                    <div class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
-                                                        style="background-color: hsl(<%= c3 %>, 80%, 40%);"></div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Action -->
-                                        <div class="hidden md:block">
-                                            <a href="/dna"
-                                                class="text-gray-400 hover:text-pronto-primary transition-colors"
-                                                title="Refine DNA">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                                                    </path>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% } %>
-
-                                    <!-- Campaigns List -->
-                                    <% if (campaignsSafe.length===0) { %>
-                                        <!-- Empty State -->
-                                        <div
-                                            class="text-center py-20 bg-white/40 dark:bg-gray-800/60 backdrop-blur-md rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                            </svg>
-                                            <h3 class="mt-2 text-sm font-medium text-gray-900">No campaigns yet</h3>
-                                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new campaign
-                                                for
-                                                your
-                                                business.
-                                            </p>
-                                            <div class="mt-6">
-                                                <a href="/campaign"
-                                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pronto-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pronto-primary">
-                                                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd"
-                                                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                    Create Campaign
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <% } else { %>
-                                            <!-- Campaigns Grid -->
-                                            <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                                                <!-- Create New Card -->
-                                                <a href="/campaign"
-                                                    class="group flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300/50 dark:border-gray-600/50 rounded-xl hover:border-pronto-primary hover:bg-white/60 dark:hover:bg-gray-700/60 transition-all duration-300 h-full min-h-[300px] bg-white/40 dark:bg-gray-800/60 backdrop-blur-md">
-                                                    <div
-                                                        class="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors">
-                                                        <i class="ri-add-line text-4xl text-pronto-primary"></i>
-                                                    </div>
-                                                    <h3
-                                                        class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-pronto-primary">
-                                                        Create New
-                                                    </h3>
-                                                    <p
-                                                        class="text-sm text-center text-gray-500 dark:text-gray-400 mt-1">
-                                                        Start a
-                                                        new marketing
-                                                        campaign
-                                                    </p>
-                                                </a>
-
-                                                <!-- Campaign Cards -->
-                                                <% campaignsSafe.forEach(function(campaign) { %>
-                                                    <div
-                                                        class="bg-white/60 dark:bg-gray-800/80 backdrop-blur-md group rounded-xl border border-white/50 dark:border-gray-700/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
-                                                        <!-- Thumbnail -->
-                                                        <div
-                                                            class="h-48 w-full bg-gray-100 relative overflow-hidden border-b border-gray-100">
-                                                            <% if (campaign.thumbnail_url) { %>
-                                                                <img src="<%= campaign.thumbnail_url %>"
-                                                                    alt="Campaign Thumbnail"
-                                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                                                <% } else { %>
-                                                                    <div
-                                                                        class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-                                                                        <span
-                                                                            class="text-2xl font-bold text-blue-200 select-none">
-                                                                            <%= campaign.title.substring(0,
-                                                                                2).toUpperCase() %>
-                                                                        </span>
-                                                                        <svg class="w-8 h-8 text-blue-100 mt-2"
-                                                                            fill="none" stroke="currentColor"
-                                                                            viewBox="0 0 24 24">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round" stroke-width="2"
-                                                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                                            </path>
-                                                                        </svg>
-                                                                    </div>
-                                                                    <% } %>
-
-                                                                        <!-- Status Badge -->
-                                                                        <div
-                                                                            class="absolute top-3 right-3 flex space-x-2">
+                                                            class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase mb-2">Brand
+                                                            Voice</span>
+                                                        <div class="flex space-x-2">
+                                                            <% if (dnaSafe.tone_tags && Array.isArray(dnaSafe.tone_tags)
+                                                                && dnaSafe.tone_tags.length) { %>
+                                                                <% dnaSafe.tone_tags.slice(0, 3).forEach(tag=> { %>
+                                                                    <span
+                                                                        class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                                                                        <%= tag %>
+                                                                    </span>
+                                                                    <% }) %>
+                                                                        <% } else { %>
                                                                             <span
-                                                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm <%= campaign.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-white/90 backdrop-blur text-gray-600' %>">
-                                                                                <%= campaign.status.charAt(0).toUpperCase()
-                                                                                    + campaign.status.slice(1) %>
-                                                                            </span>
-                                                                            <!-- Delete Button -->
-                                                                            <a href="/campaign/delete/<%= campaign.id %>"
-                                                                                onclick="return confirm('Are you sure?')"
-                                                                                class="bg-white/90 backdrop-blur p-1 rounded-full text-red-400 hover:text-red-600 shadow-sm transition-colors">
-                                                                                <i class="ri-delete-bin-line"></i>
-                                                                            </a>
-                                                                        </div>
-                                                        </div>
-
-                                                        <div class="p-5 flex-grow flex flex-col justify-between">
-                                                            <div>
-                                                                <h3
-                                                                    class="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-pronto-primary transition-colors line-clamp-1">
-                                                                    <%= campaign.title %>
-                                                                </h3>
-                                                                <p
-                                                                    class="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-3">
-                                                                    <%= campaign.business_name %>
-                                                                </p>
-                                                            </div>
-
-                                                            <div
-                                                                class="flex items-center justify-between mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
-                                                                <span class="text-xs text-gray-400 dark:text-gray-500">
-                                                                    <%= new
-                                                                        Date(campaign.created_at).toLocaleDateString('en-US',
-                                                                        { month: 'short' , day: 'numeric' ,
-                                                                        year: 'numeric' }) %>
-                                                                </span>
-                                                                <a href="/campaign/<%= campaign.id %>"
-                                                                    class="text-sm font-semibold text-pronto-primary hover:text-blue-800 dark:hover:text-blue-400 transition-colors">
-                                                                    Manage &rarr;
-                                                                </a>
-                                                            </div>
+                                                                                class="text-sm text-gray-400 italic">Not
+                                                                                defined</span>
+                                                                            <% } %>
                                                         </div>
                                                     </div>
-                                                    <% }); %>
+
+                                                    <!-- Visuals (Simulated) -->
+                                                    <div class="flex flex-col items-center md:items-start">
+                                                        <span
+                                                            class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase mb-2">Brand
+                                                            Palette</span>
+                                                        <div class="flex space-x-[-8px]">
+                                                            <% // Simple hash function to generate stable colors from
+                                                                name const str=dnaSafe.business_name || 'brand' ; let
+                                                                hash=0; for (let i=0; i < str.length; i++) {
+                                                                hash=str.charCodeAt(i) + ((hash << 5) - hash); } const
+                                                                c1=Math.abs(hash % 360); const c2=Math.abs((hash + 120)
+                                                                % 360); const c3=Math.abs((hash + 240) % 360); %>
+                                                                <div class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+                                                                    style="background-color: hsl(<%= c1 %>, 70%, 60%);">
+                                                                </div>
+                                                                <div class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+                                                                    style="background-color: hsl(<%= c2 %>, 60%, 50%);">
+                                                                </div>
+                                                                <div class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+                                                                    style="background-color: hsl(<%= c3 %>, 80%, 40%);">
+                                                                </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Action -->
+                                                    <div class="hidden md:block">
+                                                        <a href="/dna"
+                                                            class="text-gray-400 hover:text-pronto-primary transition-colors"
+                                                            title="Refine DNA">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                                                                </path>
+                                                            </svg>
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <% } %>
 
-                        </div>
+                                                <!-- Campaigns List -->
+                                                <% if (campaignsSafe.length===0) { %>
+                                                    <!-- Empty State -->
+                                                    <div
+                                                        class="text-center py-20 bg-white/40 dark:bg-gray-800/60 backdrop-blur-md rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                        </svg>
+                                                        <h3 class="mt-2 text-sm font-medium text-gray-900">No campaigns
+                                                            yet</h3>
+                                                        <p class="mt-1 text-sm text-gray-500">Get started by creating a
+                                                            new campaign
+                                                            for
+                                                            your
+                                                            business.
+                                                        </p>
+                                                        <div class="mt-6">
+                                                            <a href="/campaign"
+                                                                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pronto-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pronto-primary">
+                                                                <svg class="-ml-1 mr-2 h-5 w-5"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fill-rule="evenodd"
+                                                                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                                                        clip-rule="evenodd" />
+                                                                </svg>
+                                                                Create Campaign
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <% } else { %>
+                                                        <!-- Campaigns Grid -->
+                                                        <div
+                                                            class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                                                            <!-- Create New Card -->
+                                                            <a href="/campaign"
+                                                                class="group flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300/50 dark:border-gray-600/50 rounded-xl hover:border-pronto-primary hover:bg-white/60 dark:hover:bg-gray-700/60 transition-all duration-300 h-full min-h-[300px] bg-white/40 dark:bg-gray-800/60 backdrop-blur-md">
+                                                                <div
+                                                                    class="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors">
+                                                                    <i
+                                                                        class="ri-add-line text-4xl text-pronto-primary"></i>
+                                                                </div>
+                                                                <h3
+                                                                    class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-pronto-primary">
+                                                                    Create New
+                                                                </h3>
+                                                                <p
+                                                                    class="text-sm text-center text-gray-500 dark:text-gray-400 mt-1">
+                                                                    Start a
+                                                                    new marketing
+                                                                    campaign
+                                                                </p>
+                                                            </a>
+
+                                                            <!-- Campaign Cards -->
+                                                            <% campaignsSafe.forEach(function(campaign) { %>
+                                                                <div
+                                                                    class="bg-white/60 dark:bg-gray-800/80 backdrop-blur-md group rounded-xl border border-white/50 dark:border-gray-700/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+                                                                    <!-- Thumbnail -->
+                                                                    <div
+                                                                        class="h-48 w-full bg-gray-100 relative overflow-hidden border-b border-gray-100">
+                                                                        <% if (campaign.thumbnail_url) { %>
+                                                                            <img src="<%= campaign.thumbnail_url %>"
+                                                                                alt="Campaign Thumbnail"
+                                                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                                                            <% } else { %>
+                                                                                <div
+                                                                                    class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+                                                                                    <span
+                                                                                        class="text-2xl font-bold text-blue-200 select-none">
+                                                                                        <%= campaign.title.substring(0,
+                                                                                            2).toUpperCase() %>
+                                                                                    </span>
+                                                                                    <svg class="w-8 h-8 text-blue-100 mt-2"
+                                                                                        fill="none"
+                                                                                        stroke="currentColor"
+                                                                                        viewBox="0 0 24 24">
+                                                                                        <path stroke-linecap="round"
+                                                                                            stroke-linejoin="round"
+                                                                                            stroke-width="2"
+                                                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                                                        </path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <% } %>
+
+                                                                                    <!-- Status Badge -->
+                                                                                    <div
+                                                                                        class="absolute top-3 right-3 flex space-x-2">
+                                                                                        <span
+                                                                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm <%= campaign.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-white/90 backdrop-blur text-gray-600' %>">
+                                                                                            <%= campaign.status.charAt(0).toUpperCase()
+                                                                                                +
+                                                                                                campaign.status.slice(1)
+                                                                                                %>
+                                                                                        </span>
+                                                                                        <!-- Delete Button -->
+                                                                                        <a href="/campaign/delete/<%= campaign.id %>"
+                                                                                            onclick="return confirm('Are you sure?')"
+                                                                                            class="bg-white/90 backdrop-blur p-1 rounded-full text-red-400 hover:text-red-600 shadow-sm transition-colors">
+                                                                                            <i
+                                                                                                class="ri-delete-bin-line"></i>
+                                                                                        </a>
+                                                                                    </div>
+                                                                    </div>
+
+                                                                    <div
+                                                                        class="p-5 flex-grow flex flex-col justify-between">
+                                                                        <div>
+                                                                            <h3
+                                                                                class="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-pronto-primary transition-colors line-clamp-1">
+                                                                                <%= campaign.title %>
+                                                                            </h3>
+                                                                            <p
+                                                                                class="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-3">
+                                                                                <%= campaign.business_name %>
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div
+                                                                            class="flex items-center justify-between mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
+                                                                            <span
+                                                                                class="text-xs text-gray-400 dark:text-gray-500">
+                                                                                <%= new
+                                                                                    Date(campaign.created_at).toLocaleDateString('en-US',
+                                                                                    { month: 'short' , day: 'numeric' ,
+                                                                                    year: 'numeric' }) %>
+                                                                            </span>
+                                                                            <a href="/campaign/<%= campaign.id %>"
+                                                                                class="text-sm font-semibold text-pronto-primary hover:text-blue-800 dark:hover:text-blue-400 transition-colors">
+                                                                                Manage &rarr;
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <% }); %>
+                                                        </div>
+                                                        <% } %>
+
+                            </div>
                     </main>
 
                     <!-- Footer -->
